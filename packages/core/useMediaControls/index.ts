@@ -379,8 +379,18 @@ export function useMediaControls(target: MaybeRef<HTMLMediaElement | null | unde
     const el = unref(target)
     if (!el)
       return
-
-    isPlaying ? el.play() : el.pause()
+    if (!isPlaying)
+      return el.pause()
+    
+    const promise = el.play()
+    if (promise !== undefined) {
+      promise.catch(error => {
+          // Auto-play was prevented
+          // Show a UI element to let the user manually start playback
+      }).then(() => {
+          // Auto-play started
+      })
+    }
   })
 
   useEventListener(target, 'timeupdate', () => ignoreCurrentTimeUpdates(() => currentTime.value = (unref(target))!.currentTime))
